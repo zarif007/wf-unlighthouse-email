@@ -33,7 +33,7 @@ jobs:
 
       # Generate the Lighthouse report
       - name: Generate Lighthouse Report
-        run: npm install @unlighthouse/cli & npx unlighthouse-ci --site http://localhost:3000 --reporter json
+        run: npx unlighthouse-ci --site http://localhost:3000 --reporter json
 
       # Save the report as an artifact
       - name: Save Report as Artifact

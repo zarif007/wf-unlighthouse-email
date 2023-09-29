@@ -14,8 +14,8 @@ jobs:
         uses: actions/checkout@v2
 
       # Create a new branch to run the build and tests on
-      - name: Create Lighthouse Branch
-        run: git checkout -b lighthouse
+      - name: Create UnLighthouse Branch
+        run: git checkout -b unLighthouse
 
       # Build the project
       - name: Install Dependencies and Build
@@ -32,14 +32,14 @@ jobs:
         run: sleep 10
 
       # Generate the Lighthouse report
-      - name: Generate Lighthouse Report
+      - name: Generate UnLighthouse Report
         run: npx unlighthouse-ci --site http://localhost:3000 --reporter json
 
       # Save the report as an artifact
       - name: Save Report as Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: lighthouse-report
+          name: unLighthouse-report
           path: .unlighthouse/ci-result.json
       
       - name: Display Report in Terminal
@@ -48,23 +48,16 @@ jobs:
       - name: Send Report via Mailgun
         env:
           MAILGUN_API_KEY: ${{ secrets.MAILGUN_API_KEY }}
+          MAILGUN_DOMAIN: ${{ secrets.MAILGUN_DOMAIN }}
         run: |
-          const formData = require('form-data');
-          const Mailgun = require('mailgun.js');
-          const mailgun = new Mailgun(formData);
-          const mg = mailgun.client({ username: 'api', key: process.env.MAILGUN_API_KEY });
+          # Prepare the email content
+          EMAIL_CONTENT="Attached is the UnLighthouse report."
 
-          mg.messages.create('sandbox-123.mailgun.org', {
-            from: "Excited User <mailgun@sandbox-123.mailgun.org>",
-            to: ["recipient@example.com"], // Replace with the recipient's email address
-            subject: "Lighthouse Report",
-            text: "Attached is the Lighthouse report.",
-            attachment: [
-              {
-                data: require('fs').readFileSync('.unlighthouse/ci-result.json'),
-                filename: 'lighthouse-report.json',
-              },
-            ],
-          })
-          .then(msg => console.log(msg)) // logs response data
-          .catch(err => console.log(err));
+          # Send the email via Mailgun
+          curl -s --user "api:$MAILGUN_API_KEuY" \
+            https://api.mailgun.net/v3/$MAILGUN_DOMAIN/messages \
+            -F from='Sending User <zarif007@gmail.com>' \
+            -F to='zarif786@gmail.com' \
+            -F subject="UnLighthouse Report" \
+            -F text="$EMAIL_CONTENT" \
+            -F attachment=@.unlighthouse/ci-result.json

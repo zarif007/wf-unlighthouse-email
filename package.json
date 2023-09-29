@@ -11,6 +11,7 @@
   "dependencies": {
     "@octokit/rest": "^20.0.2",
     "@unlighthouse/cli": "^0.10.0",
+    "form-data": "^4.0.0",
     "lighthouse": "^11.1.0",
     "mailgun.js": "^9.3.0",
     "next": "latest",

@@ -45,14 +45,16 @@ jobs:
       - uses: actions/github-script@v5
         with:
           script: |
-            const email = require('@octokit/rest').email;
-
+            // Get the email address of the sender
             const sender = github.context.actor;
 
+            // Get the email address of the recipient
             const recipient = github.context.repository.owner.email;
 
+            // Get the Lighthouse report artifact
             const lighthouseReportArtifact = await github.actions.getArtifact('lighthouse-report');
 
+            // Send the email
             const emailResponse = await email.sendEmail({
               sender,
               recipient,

@@ -41,4 +41,26 @@ jobs:
         with:
           name: lighthouse-report
           path: .unlighthouse/ci-result.json
-          run: echo "lighthouse-report"
+
+      - uses: actions/github-script@v5
+        with:
+          script: |
+            const email = require('@octokit/rest').email;
+
+            const sender = github.context.actor;
+
+            const recipient = github.context.repository.owner.email;
+
+            const lighthouseReportArtifact = await github.actions.getArtifact('lighthouse-report');
+
+            const emailResponse = await email.sendEmail({
+              sender,
+              recipient,
+              subject: 'Lighthouse Report for {{github.repository.full_name}}',
+              body: `Hi, ${sender}!`,
+              attachments: [
+                lighthouseReportArtifact.downloadUrl,
+              ],
+            });
+
+            console.log(emailResponse);

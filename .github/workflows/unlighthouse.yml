@@ -44,3 +44,20 @@ jobs:
       
       - name: Display Report in Terminal
         run: cat .unlighthouse/ci-result.json
+
+      - name: Send Report via Mailgun
+        env:
+          MAILGUN_API_KEY: ${{ secrets.MAILGUN_API_KEY }}
+          MAILGUN_DOMAIN: ${{ secrets.MAILGUN_DOMAIN }}
+        run: |
+          # Prepare the email content
+          EMAIL_CONTENT="Attached is the Lighthouse report."
+
+          # Send the email via Mailgun
+          curl -s --user "api:$MAILGUN_API_KEY" \
+            https://api.mailgun.net/v3/$MAILGUN_DOMAIN/messages \
+            -F from="zarifhuq007@gmail.com" \
+            -F to="zarifhuq786@gmail.com" \
+            -F subject="Lighthouse Report" \
+            -F text="$EMAIL_CONTENT" \
+            -F attachment=@.unlighthouse/ci-result.json

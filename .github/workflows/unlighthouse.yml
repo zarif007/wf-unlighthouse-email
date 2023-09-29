@@ -56,8 +56,8 @@ jobs:
           # Send the email via Mailgun
           curl -s --user "api:$MAILGUN_API_KEY" \
             https://api.mailgun.net/v3/$MAILGUN_DOMAIN/messages \
-            -F from="zarifhuq007@gmail.com" \
-            -F to="zarifhuq786@gmail.com" \
+            -F from='Excited User <zarif007@gmail.com>' \
+            -F to='zarif786@gmail.com' \
             -F subject="Lighthouse Report" \
             -F text="$EMAIL_CONTENT" \
             -F attachment=@.unlighthouse/ci-result.json

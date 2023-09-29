@@ -28,10 +28,6 @@ jobs:
         with:
           node-version: 16
 
-        run: |
-          npm install lighthouse
-          lighthouse http://localhost:3000 --output json --output-path lighthouse-report.json
-
       - name: Send email with report attachment
         uses: actions/send-mail@v1
         with:

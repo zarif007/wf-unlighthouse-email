@@ -1,4 +1,4 @@
-name: Lighthouse Report on Merge
+name: UnLighthouse Report on Merge
 
 on:
   push:

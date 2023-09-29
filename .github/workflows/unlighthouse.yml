@@ -1,0 +1,52 @@
+name: Lighthouse report
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create new branch
+        run: |
+          git checkout -b lighthouse-report
+          git push origin lighthouse-report
+
+      - name: Build project
+        run: npm run build
+
+      - name: Start build server
+        run: npm start
+
+      - name: Run Lighthouse report
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+        run: |
+          npm install lighthouse
+          lighthouse http://localhost:3000 --output json --output-path lighthouse-report.json
+
+      - name: Send email with report attachment
+        uses: actions/send-mail@v1
+        with:
+          server: smtp.gmail.com
+          port: 587
+          username: ${{ secrets.GMAIL_USERNAME }}
+          password: ${{ secrets.GMAIL_PASSWORD }}
+          to: ${{ secrets.EMAIL_TO }}
+          subject: Lighthouse report for new branch
+          body: |
+            Here is the Lighthouse report for the new branch:
+
+            [Link to report]
+
+            The report is attached.
+
+          attachments:
+            - lighthouse-report.json

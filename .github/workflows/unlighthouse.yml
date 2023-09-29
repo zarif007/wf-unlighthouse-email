@@ -10,23 +10,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Main Branch
+        uses: actions/checkout@v2
 
       # Create a new branch to run the build and tests on
-      - run: git checkout -b lighthouse
+      - name: Create Lighthouse Branch
+        run: git checkout -b lighthouse
 
       # Build the project
-      - run: npm install && npm run build
+      - name: Install Dependencies and Build
+        run: |
+          npm install
+          npm run build
 
-      # Start the build server
-      - run: npm start
+      # Start the build server in the background
+      - name: Start Build Server
+        run: npm start &
+        background: true
+
+      # Wait for the server to start (adjust the sleep duration if needed)
+      - name: Wait for Server to Start
+        run: sleep 10
 
       # Generate the Lighthouse report
-      - run: npx unlighthouse-ci --site http://localhost:3000 --reporter json
+      - name: Generate Lighthouse Report
+        run: npx unlighthouse-ci --site http://localhost:3000 --reporter json
 
       # Save the report as an artifact
-      - uses: actions/upload-artifact@v3
+      - name: Save Report as Artifact
+        uses: actions/upload-artifact@v2
         with:
           name: lighthouse-report
           path: .unlighthouse/ci-result.json
-          run: echo "Artifact created"
+          run: echo "lighthouse-report"

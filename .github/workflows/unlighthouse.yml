@@ -1,4 +1,4 @@
-name: Lighthouse report
+name: Lighthouse Report on Merge
 
 on:
   push:
@@ -12,37 +12,55 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Create new branch
-        run: |
-          git checkout -b lighthouse-report
-          git push origin lighthouse-report
+      # Create a new branch to run the build and tests on
+      - run: git checkout -b lighthouse
 
-      - name: Build project
-        run: npm run build
+      # Build the project
+      - run: npm install && npm run build
 
-      - name: Start build server
-        run: npm start
+      # Start the build server
+      - run: npm start
 
-      - name: Run Lighthouse report
-        uses: actions/setup-node@v3
+      # Generate the Lighthouse report
+      - run: npx unlighthouse-ci --site http://localhost:3000 --reporter json
+
+      # Save the report as an artifact
+      - uses: actions/upload-artifact@v3
         with:
-          node-version: 16
+          name: lighthouse-report
+          path: .unlighthouse/ci-result.json
 
-      - name: Send email with report attachment
-        uses: actions/send-mail@v1
+      # Send an email with the report as an attachment
+      - uses: actions/github-script@v5
         with:
-          server: smtp.gmail.com
-          port: 587
-          username: ${{ secrets.GMAIL_USERNAME }}
-          password: ${{ secrets.GMAIL_PASSWORD }}
-          to: ${{ secrets.EMAIL_TO }}
-          subject: Lighthouse report for new branch
-          body: |
-            Here is the Lighthouse report for the new branch:
+          script: |
+            const email = require('@octokit/rest').email;
 
-            [Link to report]
+            // Get the email address of the sender
+            const sender = github.context.actor;
 
-            The report is attached.
+            // Get the email address of the recipient
+            const recipient = github.context.repository.owner.email;
 
-          attachments:
-            - lighthouse-report.json
+            // Get the Lighthouse report artifact
+            const lighthouseReportArtifact = await github.actions.getArtifact('lighthouse-report');
+
+            // Send the email
+            const emailResponse = await email.sendEmail({
+              sender,
+              recipient,
+              subject: 'Lighthouse Report for {{github.repository.full_name}}',
+              body: `Hi,
+
+Here is the Lighthouse report for {{github.repository.full_name}} on {{github.ref}}.
+
+Please see the attached report for more details.
+
+Thanks,
+{{github.actor}}`,
+              attachments: [
+                lighthouseReportArtifact.downloadUrl,
+              ],
+            });
+
+            console.log(emailResponse);

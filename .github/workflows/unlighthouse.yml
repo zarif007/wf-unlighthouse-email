@@ -41,28 +41,6 @@ jobs:
         with:
           name: lighthouse-report
           path: .unlighthouse/ci-result.json
-
-      - uses: actions/github-script@v5
-        with:
-          script: |
-            // Get the email address of the sender
-            const sender = github.context.actor;
-
-            // Get the email address of the recipient
-            const recipient = github.context.repository.owner.email;
-
-            // Get the Lighthouse report artifact
-            const lighthouseReportArtifact = await github.actions.getArtifact('lighthouse-report');
-
-            // Send the email
-            const emailResponse = await email.sendEmail({
-              sender,
-              recipient,
-              subject: 'Lighthouse Report for {{github.repository.full_name}}',
-              body: `Hi, ${sender}!`,
-              attachments: [
-                lighthouseReportArtifact.downloadUrl,
-              ],
-            });
-
-            console.log(emailResponse);
+      
+      - name: Display Report in Terminal
+        run: cat .unlighthouse/ci-result.json

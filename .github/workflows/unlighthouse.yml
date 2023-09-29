@@ -26,7 +26,6 @@ jobs:
       # Start the build server in the background
       - name: Start Build Server
         run: npm start &
-        background: true
 
       # Wait for the server to start (adjust the sleep duration if needed)
       - name: Wait for Server to Start
